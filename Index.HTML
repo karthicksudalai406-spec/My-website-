@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OriginOS Lock Screen Customizer</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#080808;
+  color:#fff;
+  min-height:100vh;
+}
+
+.app{
+  max-width:500px;
+  margin:auto;
+  background:#151515;
+  min-height:100vh;
+  padding-bottom:30px;
+}
+
+.header{
+  padding:20px;
+  font-size:22px;
+  font-weight:bold;
+  position:sticky;
+  top:0;
+  background:#151515;
+  z-index:10;
+}
+
+.preview{
+  display:flex;
+  justify-content:center;
+  padding:10px 20px 25px;
+}
+
+.phone{
+  width:290px;
+  height:590px;
+  border-radius:32px;
+  overflow:hidden;
+  position:relative;
+  background:linear-gradient(135deg,#283048,#859398);
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 15px 40px #000;
+}
+
+.phone:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom,
+  rgba(0,0,0,.05),
+  rgba(0,0,0,.4));
+}
+
+.lock{
+  position:relative;
+  z-index:2;
+  height:100%;
+  padding:45px 20px 25px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.date{
+  font-size:14px;
+  text-shadow:0 2px 5px #000;
+}
+
+.clock{
+  font-size:58px;
+  font-weight:bold;
+  margin-top:25px;
+  text-shadow:0 3px 8px #000;
+  white-space:nowrap;
+}
+
+.bottom{
+  margin-top:auto;
+  text-align:center;
+}
+
+.unlock{
+  font-size:12px;
+  margin-bottom:18px;
+}
+
+.camera{
+  font-size:25px;
+}
+
+.controls{
+  padding:0 18px;
+}
+
+.card{
+  background:#242424;
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:14px;
+}
+
+.card h3{
+  margin-bottom:14px;
+  font-size:16px;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  margin:14px 0 7px;
+}
+
+input[type=file],
+select,
+button{
+  width:100%;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  background:#333;
+  color:#fff;
+  font-size:15px;
+}
+
+input[type=file]{
+  padding:10px;
+}
+
+input[type=range]{
+  width:100%;
+}
+
+button{
+  background:#4d7cff;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.row button{
+  flex:1;
+}
+
+.value{
+  float:right;
+  color:#9db5ff;
+}
+
+.status{
+  text-align:center;
+  color:#aaa;
+  font-size:13px;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">
+🔒 OriginOS Lock Screen Customizer
+</div>
+
+<div class="preview">
+<div class="phone" id="phone">
+
+<div class="lock">
+
+<div class="date" id="date"></div>
+
+<div class="clock" id="clock">
+00:00
+</div>
+
+<div class="bottom">
+<div class="unlock">Swipe up to unlock</div>
+<div class="camera">📷</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="controls">
+
+<div class="card">
+<h3>🖼️ Wallpaper</h3>
+
+<input
+type="file"
+id="wallpaper"
+accept="image/*">
+
+<div class="status">
+உங்கள் Gallery photo-வை தேர்வு செய்யலாம்
+</div>
+</div>
+
+<div class="card">
+
+<h3>🕐 Clock Customization</h3>
+
+<label>Font</label>
+
+<select id="font">
+<option value="Arial">Arial</option>
+<option value="Georgia">Georgia</option>
+<option value="Courier New">Courier New</option>
+<option value="serif">Serif</option>
+<option value="monospace">Monospace</option>
+</select>
+
+<label>
+Clock Size
+<span class="value" id="sizeValue">58px</span>
+</label>
+
+<input
+type="range"
+id="size"
+min="35"
+max="90"
+value="58">
+
+<label>
+Clock Position
+<span class="value" id="positionValue">25px</span>
+</label>
+
+<input
+type="range"
+id="position"
+min="5"
+max="150"
+value="25">
+
+<label>Time Format</label>
+
+<select id="format">
+<option value="24">24 Hour</option>
+<option value="12">12 Hour</option>
+</select>
+
+</div>
+
+<div class="card">
+
+<h3>🌈 Clock Color</h3>
+
+<div class="row">
+<button onclick="clockColor('#ffffff')">White</button>
+<button onclick="clockColor('#4d7cff')">Blue</button>
+</div>
+
+<div class="row">
+<button onclick="clockColor('#8b5cf6')">Purple</button>
+<button onclick="clockColor('#00e676')">Green</button>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>🎨 Theme</h3>
+
+<div class="row">
+<button onclick="theme('#4d7cff')">Blue</button>
+<button onclick="theme('#8b5cf6')">Purple</button>
+</div>
+
+<div class="row">
+<button onclick="theme('#16a34a')">Green</button>
+<button onclick="theme('#dc2626')">Red</button>
+</div>
+
+</div>
+
+<div class="card">
+
+<button onclick="saveSettings()">
+💾 Save Settings
+</button>
+
+<button onclick="resetSettings()">
+🔄 Reset
+</button>
+
+<div class="status" id="status"></div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+const clock=document.getElementById("clock");
+const date=document.getElementById("date");
+const phone=document.getElementById("phone");
+const font=document.getElementById("font");
+const size=document.getElementById("size");
+const position=document.getElementById("position");
+const format=document.getElementById("format");
+
+function updateClock(){
+
+  const now=new Date();
+
+  let h=now.getHours();
+  const m=String(now.getMinutes()).padStart(2,"0");
+
+  if(format.value==="12"){
+
+    const ampm=h>=12?"PM":"AM";
+    h=h%12||12;
+
+    clock.textContent=
+      String(h).padStart(2,"0")+":"+m+" "+ampm;
+
+  }else{
+
+    clock.textContent=
+      String(h).padStart(2,"0")+":"+m;
+
+  }
+
+  date.textContent=
+    now.toLocaleDateString("en-US",{
+      weekday:"long",
+      day:"numeric",
+      month:"long"
+    });
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+font.onchange=function(){
+  clock.style.fontFamily=this.value;
+};
+
+size.oninput=function(){
+  clock.style.fontSize=this.value+"px";
+  document.getElementById("sizeValue").textContent=
+    this.value+"px";
+};
+
+position.oninput=function(){
+  clock.style.marginTop=this.value+"px";
+  document.getElementById("positionValue").textContent=
+    this.value+"px";
+};
+
+format.onchange=updateClock;
+
+document.getElementById("wallpaper").onchange=function(e){
+
+  const file=e.target.files[0];
+
+  if(!file)return;
+
+  const reader=new FileReader();
+
+  reader.onload=function(event){
+    phone.style.backgroundImage=
+      'url("' + event.target.result + '")';
+  };
+
+  reader.readAsDataURL(file);
+};
+
+function clockColor(color){
+  clock.style.color=color;
+}
+
+function theme(color){
+
+  document.querySelectorAll("button").forEach(function(btn){
+    btn.style.background=color;
+  });
+
+}
+
+function saveSettings(){
+
+  localStorage.setItem("font",font.value);
+  localStorage.setItem("size",size.value);
+  localStorage.setItem("position",position.value);
+  localStorage.setItem("format",format.value);
+  localStorage.setItem("clockColor",clock.style.color);
+
+  document.getElementById("status").textContent=
+    "✅ Settings saved";
+}
+
+function loadSettings(){
+
+  const f=localStorage.getItem("font");
+  const s=localStorage.getItem("size");
+  const p=localStorage.getItem("position");
+  const fm=localStorage.getItem("format");
+  const c=localStorage.getItem("clockColor");
+
+  if(f){
+    font.value=f;
+    clock.style.fontFamily=f;
+  }
+
+  if(s){
+    size.value=s;
+    clock.style.fontSize=s+"px";
+    document.getElementById("sizeValue").textContent=s+"px";
+  }
+
+  if(p){
+    position.value=p;
+    clock.style.marginTop=p+"px";
+    document.getElementById("positionValue").textContent=p+"px";
+  }
+
+  if(fm){
+    format.value=fm;
+  }
+
+  if(c){
+    clock.style.color=c;
+  }
+
+  updateClock();
+}
+
+function resetSettings(){
+
+  localStorage.clear();
+  location.reload();
+
+}
+
+loadSettings();
+
+</script>
+
+</body>
+</html>
