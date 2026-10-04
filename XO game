@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart XO Game</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#07111f,#172554,#312e81);
+    color:white;
+}
+
+.game{
+    width:94%;
+    max-width:430px;
+    text-align:center;
+}
+
+h1{
+    font-size:38px;
+    margin:0 0 5px;
+}
+
+.subtitle{
+    color:#cbd5e1;
+    margin-bottom:18px;
+}
+
+.menu{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.menu button{
+    flex:1;
+}
+
+button{
+    border:0;
+    border-radius:12px;
+    padding:13px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.start{
+    background:#22c55e;
+    color:white;
+    font-weight:bold;
+}
+
+.pause{
+    background:#f59e0b;
+    color:white;
+    font-weight:bold;
+}
+
+.sound{
+    background:#475569;
+    color:white;
+}
+
+.mode{
+    display:flex;
+    gap:8px;
+    margin-bottom:15px;
+}
+
+.mode button{
+    flex:1;
+    background:#334155;
+    color:white;
+}
+
+.mode button.active{
+    background:#2563eb;
+}
+
+.status{
+    padding:14px;
+    margin-bottom:14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.1);
+    font-weight:bold;
+}
+
+.board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+}
+
+.cell{
+    aspect-ratio:1;
+    font-size:clamp(45px,15vw,75px);
+    font-weight:bold;
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:2px solid rgba(255,255,255,.15);
+    border-radius:18px;
+}
+
+.cell.x{
+    color:#60a5fa;
+}
+
+.cell.o{
+    color:#f87171;
+}
+
+.reset{
+    width:100%;
+    margin-top:15px;
+    background:#ef4444;
+    color:white;
+    font-weight:bold;
+}
+
+.score{
+    display:flex;
+    justify-content:space-around;
+    margin-top:15px;
+    padding:12px;
+    border-radius:12px;
+    background:rgba(255,255,255,.08);
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+}
+
+.overlay-box{
+    width:85%;
+    max-width:350px;
+    padding:25px;
+    border-radius:20px;
+    background:#172033;
+    text-align:center;
+}
+
+.overlay-box h2{
+    margin-top:0;
+}
+
+.overlay-box button{
+    width:100%;
+    margin-top:10px;
+}
+
+.hidden{
+    display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>⭕ XO ❌</h1>
+
+    <div class="subtitle">
+        Smart Tic-Tac-Toe
+    </div>
+
+    <!-- START / PAUSE / SOUND -->
+
+    <div class="menu">
+
+        <button
+            id="startBtn"
+            class="start">
+            ▶ Start
+        </button>
+
+        <button
+            id="pauseBtn"
+            class="pause">
+            ⏸ Pause
+        </button>
+
+        <button
+            id="soundBtn"
+            class="sound">
+            🔊 Sound
+        </button>
+
+    </div>
+
+    <!-- GAME MODE -->
+
+    <div class="mode">
+
+        <button
+            id="computerBtn"
+            class="active">
+            🤖 Computer
+        </button>
+
+        <button
+            id="twoPlayerBtn">
+            👥 2 Player
+        </button>
+
+    </div>
+
+    <div
+        id="status"
+        class="status">
+        Press Start to play
+    </div>
+
+    <div
+        id="board"
+        class="board">
+    </div>
+
+    <button
+        id="resetBtn"
+        class="reset">
+        🔄 New Game
+    </button>
+
+    <div class="score">
+
+        <div>
+            X
+            <br>
+            <strong id="xScore">0</strong>
+        </div>
+
+        <div>
+            Draw
+            <br>
+            <strong id="drawScore">0</strong>
+        </div>
+
+        <div>
+            O
+            <br>
+            <strong id="oScore">0</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PAUSE SCREEN -->
+
+<div
+    id="
