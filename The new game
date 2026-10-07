@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>XO Smart Game</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#020617,#172554,#312e81);
+    font-family:Arial,sans-serif;
+    color:white;
+}
+
+.game{
+    width:94%;
+    max-width:430px;
+    text-align:center;
+}
+
+h1{
+    margin:0 0 5px;
+    font-size:40px;
+}
+
+.subtitle{
+    color:#cbd5e1;
+    margin-bottom:18px;
+}
+
+.controls{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+button{
+    border:0;
+    border-radius:12px;
+    padding:13px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.start{
+    background:#22c55e;
+    color:white;
+}
+
+.pause{
+    background:#f59e0b;
+    color:white;
+}
+
+.sound{
+    background:#475569;
+    color:white;
+}
+
+.restart{
+    background:#ef4444;
+    color:white;
+    width:100%;
+    margin-top:15px;
+}
+
+.modes{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin:12px 0;
+}
+
+.mode{
+    background:#334155;
+    color:white;
+}
+
+.mode.active{
+    background:#2563eb;
+}
+
+.status{
+    background:rgba(255,255,255,.1);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:14px;
+    font-weight:bold;
+}
+
+.board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+}
+
+.cell{
+    aspect-ratio:1;
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:2px solid rgba(255,255,255,.15);
+    border-radius:18px;
+    font-size:65px;
+}
+
+.cell.x{
+    color:#60a5fa;
+}
+
+.cell.o{
+    color:#f87171;
+}
+
+.score{
+    display:flex;
+    justify-content:space-around;
+    margin-top:15px;
+    padding:12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.1);
+}
+
+.pauseScreen{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.pauseBox{
+    width:85%;
+    max-width:350px;
+    background:#172033;
+    padding:25px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.pauseBox button{
+    width:100%;
+    margin-top:10px;
+}
+
+.hidden{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>⭕ XO ❌</h1>
+
+    <div class="subtitle">
+        Smart Tic-Tac-Toe
+    </div>
+
+    <div class="controls">
+
+        <button id="startBtn" class="start">
+            ▶ Start
+        </button>
+
+        <button id="pauseBtn" class="pause">
+            ⏸ Pause
+        </button>
+
+        <button id="soundBtn" class="sound">
+            🔊 Sound ON
+        </button>
+
+        <button id="restartBtn" class="restart">
+            🔄 New Game
+        </button>
+
+    </div>
+
+    <div class="modes">
+
+        <button id="computerBtn" class="mode active">
+            🤖 Computer
+        </button>
+
+        <button id="twoPlayerBtn" class="mode">
+            👥 2 Player
+        </button>
+
+    </div>
+
+    <div id="status" class="status">
+        ▶ Start button அழுத்தவும்
+    </div>
+
+    <div id="board" class="board"></div>
+
+    <div class="score">
+
+        <div>
+            ❌ X
+            <br>
+            <strong id="xScore">0</strong>
+        </div>
+
+        <div>
+            🤝 Draw
+            <br>
+            <strong id="drawScore">0</strong>
+        </div>
+
+        <div>
+            ⭕ O
+            <br>
+            <strong id="oScore">0</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="pauseScreen" class="pauseScreen hidden">
+
+    <div class="pauseBox">
+
+        <h2>⏸ Game Paused</h2>
+
+        <p>Game pause செய்யப்பட்டிருக்கிறது.</p>
+
+        <button id="playBtn" class="start">
+            ▶ Play
+        </button>
+
+        <button id="pauseRestartBtn" class="restart">
+            🔄 Restart
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const boardElement = document.getElementById("board");
+const statusElement = document.getElementById("status");
+
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const soundBtn = document.getElementById("soundBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+const computerBtn = document.getElementById("computerBtn");
+const twoPlayerBtn = document.getElementById("twoPlayerBtn");
+
+const pauseScreen = document.getElementById("pauseScreen");
+const playBtn = document.getElementById("playBtn");
+const pauseRestartBtn = document.getElementById("pauseRestartBtn");
+
+
+let board = ["","","","","","","","",""];
+
+let started = false;
+let paused = false;
+let gameOver = false;
+
+let mode = "computer";
+
+let soundOn = true;
+
+let xScore = 0;
+let oScore = 0;
+let drawScore = 0;
+
+
+const wins = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+
+    [0,4,8],
+    [2,4,6]
+];
+
+
+function sound(type){
+
+    if(!soundOn){
+        return;
+    }
+
+    try{
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if(!AudioContext){
+            return;
+        }
+
+        const audio =
+            new AudioContext();
+
+        const oscillator =
+            audio.createOscillator();
+
+        const gain =
+            audio.createGain();
+
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+
+        if(type === "win"){
+            oscillator.frequency.value = 800;
+        }
+        else if(type === "error"){
+            oscillator.frequency.value = 200;
+        }
+        else{
+            oscillator.frequency.value = 500;
+        }
+
+        oscillator.type = "sine";
+
+        gain.gain.value = 0.15;
+
+        oscillator.start();
+
+        oscillator.stop(
+            audio.currentTime + 0.15
+        );
+
+    }
+    catch(e){
+
+        console.log("Sound error");
+
+    }
+
+}
+
+
+function createBoard(){
+
+    boardElement.innerHTML = "";
+
+    for(let i = 0; i < 9; i++){
+
+        const button =
+            document.createElement("button");
+
+        button.className = "cell";
+
+        button.type = "button";
+
+        button.addEventListener(
+            "click",
+            function(){
+
+                playCell(i);
+
+            }
+        );
+
+        boardElement.appendChild(button);
+
+    }
+
+    showBoard();
+
+}
+
+
+function showBoard(){
+
+    const cells =
+        document.querySelectorAll(".cell");
+
+    cells.forEach(function(cell,index){
+
+        cell.textContent = board[index];
+
+        cell.classList.remove("x");
+        cell.classList.remove("o");
+
+        if(board[index] === "X"){
+            cell.classList.add("x");
+        }
+
+        if(board[index] === "O"){
+            cell.classList.add("o");
+        }
+
+    });
+
+}
+
+
+function playCell(index){
+
+    if(!started || paused || gameOver){
+        return;
+    }
+
+    if(board[index] !== ""){
+        sound("error");
+        return;
+    }
+
+
+    if(mode === "computer"){
+
+        board[index] = "X";
+
+        sound("click");
+
+        showBoard();
+
+        if(checkGame()){
+            return;
+        }
+
+        statusElement.textContent =
+            "🤖 Computer யோசிக்கிறது...";
+
+        setTimeout(function(){
+
+            computerPlay();
+
+        },400);
+
+    }
+
+    else{
+
+        let count = 0;
+
+        for(let i = 0; i < 9; i++){
+
+            if(board[i] !== ""){
+                count++;
+            }
+
+        }
+
+        const player =
+            count % 2 === 0 ? "X" : "O";
+
+        board[index] = player;
+
+        sound("click");
+
+        showBoard();
+
+        checkGame();
+
+    }
+
+}
+
+
+function computerPlay(){
+
+    if(
+        !started ||
+        paused ||
+        gameOver
+    ){
+        return;
+    }
+
+    const move =
+        bestMove();
+
+    if(move !== -1){
+
+        board[move] = "O";
+
+        sound("click");
+
+        showBoard();
+
+    }
+
+    checkGame();
+
+}
+
+
+function bestMove(){
+
+    // Computer win
+
+    for(let i = 0; i < 9; i++){
+
+        if(board[i] === ""){
+
+            board[i] = "O";
+
+            if(getWinner() === "O"){
+
+                board[i] = "";
+
+                return i;
+
+            }
+
+            board[i] = "";
+
+        }
+
+    }
+
+
+    // Player block
+
+    for(let i = 0; i < 9; i++){
+
+        if(board[i] === ""){
+
+            board[i] = "X";
+
+            if(getWinner() === "X"){
+
+                board[i] = "";
+
+                return i;
+
+            }
+
+            board[i] = "";
+
+        }
+
+    }
+
+
+    // Center
+
+    if(board[4] === ""){
+        return 4;
+    }
+
+
+    // Corners
+
+    const corners =
+        [0,2,6,8].filter(
+            function(i){
+                return board[i] === "";
+            }
+        );
+
+    if(corners.length > 0){
+
+        return corners[
+            Math.floor(
+                Math.random() * corners.length
+            )
+        ];
+
+    }
+
+
+    // Empty space
+
+    for(let i = 0; i < 9; i++){
+
+        if(board[i] === ""){
+            return i;
+        }
+
+    }
+
+    return -1;
+
+}
+
+
+function getWinner(){
+
+    for(let i = 0; i < wins.length; i++){
+
+        const a = wins[i][0];
+        const b = wins[i][1];
+        const c = wins[i][2];
+
+        if(
+            board[a] !== "" &&
+            board[a] === board[b] &&
+            board[b] === board[c]
+        ){
+
+            return board[a];
+
+        }
+
+    }
+
+    return null;
+
+}
+
+
+function checkGame(){
+
+    const winner = getWinner();
+
+    if(winner){
+
+        gameOver = true;
+
+        if(winner === "X"){
+            xScore++;
+        }
+        else{
+            oScore++;
+        }
+
+        updateScore();
+
+        sound("win");
+
+        statusElement.textContent =
+            "🎉 " + winner + " WIN!";
+
+        return true;
+
+    }
+
+
+    let full = true;
+
+    for(let i = 0; i < 9; i++){
+
+        if(board[i] === ""){
+            full = false;
+            break;
+        }
+
+    }
+
+
+    if(full){
+
+        gameOver = true;
+
+        drawScore++;
+
+        updateScore();
+
+        statusElement.textContent =
+            "🤝 DRAW!";
+
+        sound("error");
+
+        return true;
+
+    }
+
+
+    if(mode === "computer"){
+
+        statusElement.textContent =
+            "உங்கள் Turn — ❌ X";
+
+    }
+    else{
+
+        let count = 0;
+
+        for(let i = 0; i < 9; i++){
+
+            if(board[i] !== ""){
+                count++;
+            }
+
+        }
+
+        const player =
+            count % 2 === 0 ? "X" : "O";
+
+        statusElement.textContent =
+            "Player " + player + " Turn";
+
+    }
+
+    return false;
+
+}
+
+
+function startGame(){
+
+    board = [
+        "","","",
+        "","","",
+        "","",""
+    ];
+
+    started = true;
+    paused = false;
+    gameOver = false;
+
+    pauseScreen.classList.add("hidden");
+
+    showBoard();
+
+    if(mode === "computer"){
+
+        statusElement.textContent =
+            "உங்கள் Turn — ❌ X";
+
+    }
+    else{
+
+        statusElement.textContent =
+            "Player X Turn";
+
+    }
+
+    sound("click");
+
+}
+
+
+function pauseGame(){
+
+    if(!started || gameOver){
+        return;
+    }
+
+    paused = true;
+
+    pauseScreen.classList.remove("hidden");
+
+    statusElement.textContent =
+        "⏸ Game Paused";
+
+    sound("click");
+
+}
+
+
+function playGame(){
+
+    if(!started){
+        return;
+    }
+
+    paused = false;
+
+    pauseScreen.classList.add("hidden");
+
+    checkGame();
+
+    sound("click");
+
+}
+
+
+function updateScore(){
+
+    document.getElementById("xScore").textContent =
+        xScore;
+
+    document.getElementById("oScore").textContent =
+        oScore;
+
+    document.getElementById("drawScore").textContent =
+        drawScore;
+
+}
+
+
+startBtn.addEventListener(
+    "click",
+    function(){
+
+        if(!started){
+
+            startGame();
+
+        }
+
+    }
+);
+
+
+pauseBtn.addEventListener(
+    "click",
+    function(){
+
+        pauseGame();
+
+    }
+);
+
+
+playBtn.addEventListener(
+    "click",
+    function(){
+
+        playGame();
+
+    }
+);
+
+
+restartBtn.addEventListener(
+    "click",
+    function(){
+
+        startGame();
+
+    }
+);
+
+
+pauseRestartBtn.addEventListener(
+    "click",
+    function(){
+
+        startGame();
+
+    }
+);
+
+
+soundBtn.addEventListener(
+    "click",
+    function(){
+
+        soundOn = !soundOn;
+
+        if(soundOn){
+
+            soundBtn.textContent =
+                "🔊 Sound ON";
+
+            sound("click");
+
+        }
+        else{
+
+            soundBtn.textContent =
+                "🔇 Sound OFF";
+
+        }
+
+    }
+);
+
+
+computerBtn.addEventListener(
+    "click",
+    function(){
+
+        mode = "computer";
+
+        computerBtn.classList.add("active");
+        twoPlayerBtn.classList.remove("active");
+
+        startGame();
+
+    }
+);
+
+
+twoPlayerBtn.addEventListener(
+    "click",
+    function(){
+
+        mode = "twoPlayer";
+
+        twoPlayerBtn.classList.add("active");
+        computerBtn.classList.remove("active");
+
+        startGame();
+
+    }
+);
+
+
+createBoard();
+
+</script>
+
+</body>
+</html>
